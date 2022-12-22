@@ -1,11 +1,26 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core'
+import { DocumentBuilder } from '@nestjs/swagger'
+import { SwaggerModule } from '@nestjs/swagger/dist'
+import { AppModule } from './app.module'
+import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService)
-  const port = configService.get('port')
-  await app.listen(3000);
+	const app = await NestFactory.create(AppModule)
+	app.enableCors()
+
+  app.useGlobalPipes(new ValidationPipe())
+
+	const config = new DocumentBuilder()
+		.setTitle('Lesson api')
+		.setDescription('This api for lesson')
+		.setVersion('1.0')
+		.addTag('API')
+		.build()
+
+	const document = SwaggerModule.createDocument(app, config)
+
+	SwaggerModule.setup('api', app, document)
+
+	await app.listen(3000)
 }
-bootstrap();
+bootstrap()
